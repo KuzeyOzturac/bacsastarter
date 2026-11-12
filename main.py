@@ -14,12 +14,6 @@ REELS_URL = "https://www.instagram.com/reels/"
 
 
 def main():
-    if not hasattr(cv2, "CascadeClassifier") or not hasattr(cv2, "data"):
-        raise RuntimeError(
-            "This Python loaded an incomplete cv2 package. Create and activate "
-            "a fresh .venv, then run: python -m pip install -r requirements.txt"
-        )
-
     camera = cv2.VideoCapture(0)
     if not camera.isOpened():
         raise RuntimeError("Could not open the webcam. Check camera permissions.")
