@@ -9,6 +9,17 @@ from vision import gaze_direction
 
 @dataclass(frozen=True)
 class FocusStatus:
+    """Describe the current focus state and whether to take an action.
+
+    Attributes:
+        text: Message shown in the camera window.
+        color: OpenCV BGR color for the message.
+        gaze: Estimated gaze direction or a calibration/unknown label.
+        smooth_horizontal: Recent horizontal gaze value, if a face is visible.
+        smooth_vertical: Recent vertical gaze value, if a face is visible.
+        trigger: Whether this update starts a new focus-loss action.
+    """
+
     text: str
     color: tuple[int, int, int]
     gaze: str = "unknown"
@@ -18,7 +29,11 @@ class FocusStatus:
 
 
 class FocusTracker:
+    """Track calibration and state across camera frames."""
+
     def __init__(self):
+        """Start with empty gaze history and no calibrated center."""
+
         self.horizontal = deque(maxlen=GAZE_SMOOTHING_FRAMES)
         self.vertical = deque(maxlen=GAZE_SMOOTHING_FRAMES)
         self.calibration_horizontal = []
@@ -29,7 +44,16 @@ class FocusTracker:
         self.triggered = False
 
     def update(self, now, measurement=None):
-        """measurement is (head, closed, horizontal, vertical), or None if no face."""
+        """Update calibration or focus state from one camera frame.
+
+        Args:
+            now: Current monotonic time in seconds.
+            measurement: A tuple of head direction, eye-closure flag,
+                horizontal gaze, and vertical gaze; None if no face is visible.
+
+        Returns:
+            A status for the current frame, including any focus-loss trigger.
+        """
         if measurement is None:
             self.horizontal.clear()
             self.vertical.clear()
