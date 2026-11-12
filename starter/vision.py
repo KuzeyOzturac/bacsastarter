@@ -20,9 +20,19 @@ NOSE_TIP = 1
 LEFT_FACE = 234
 RIGHT_FACE = 454
 def clamp(value, minimum, maximum):
+    """Keep a number within an inclusive range.
+
+    Args:
+        value: Number to limit.
+        minimum: Lowest allowed value.
+        maximum: Highest allowed value.
+
+    Returns:
+        The value limited to the given range.
+    """
     return max(
         minimum,
-        min(value, maximum),
+        min(value, maximum)
     )
 
 
@@ -30,17 +40,40 @@ def landmark_xy(
     landmarks,
     index,
     width,
-    height,
+    height
 ):
+    """Convert a normalized face landmark to image pixel coordinates.
+
+    Args:
+        landmarks: Sequence of MediaPipe face landmarks.
+        index: Landmark index to read.
+        width: Image width in pixels.
+        height: Image height in pixels.
+
+    Returns:
+        The landmark's integer (x, y) pixel coordinates.
+
+    Raises:
+        IndexError: If the landmark index is unavailable.
+    """
     point = landmarks[index]
 
     return (
         int(point.x * width),
-        int(point.y * height),
+        int(point.y * height)
     )
 
 
 def euclidean(p1, p2):
+    """Measure the straight-line distance between two image points.
+
+    Args:
+        p1: First (x, y) point.
+        p2: Second (x, y) point.
+
+    Returns:
+        Distance between the points in pixels.
+    """
     return math.sqrt(
         (p1[0] - p2[0]) ** 2
         + (p1[1] - p2[1]) ** 2
@@ -51,8 +84,23 @@ def average_point(
     landmarks,
     indices,
     width,
-    height,
+    height
 ):
+    """Find the center of several face landmarks in image pixels.
+
+    Args:
+        landmarks: Sequence of MediaPipe face landmarks.
+        indices: Landmark indices to average.
+        width: Image width in pixels.
+        height: Image height in pixels.
+
+    Returns:
+        Mean (x, y) position of the selected landmarks.
+
+    Raises:
+        IndexError: If a requested landmark is unavailable.
+        ZeroDivisionError: If indices is empty.
+    """
     x = 0
     y = 0
 
@@ -61,7 +109,7 @@ def average_point(
             landmarks,
             index,
             width,
-            height,
+            height
         )
 
         x += px
@@ -69,7 +117,7 @@ def average_point(
 
     return (
         x / len(indices),
-        y / len(indices),
+        y / len(indices)
     )
 
 
@@ -78,6 +126,14 @@ def average_point(
 # ============================================================
 
 def head_direction(landmarks):
+    """Estimate whether the head points left, right, or center.
+
+    Args:
+        landmarks: MediaPipe face landmarks containing the nose and face sides.
+
+    Returns:
+        "left", "right", or "center" based on nose position.
+    """
     left_x = landmarks[LEFT_FACE].x
     right_x = landmarks[RIGHT_FACE].x
     nose_x = landmarks[NOSE_TIP].x
@@ -113,44 +169,58 @@ def eye_aspect_ratio(
     outer_index,
     inner_index,
     width,
-    height,
+    height
 ):
+    """Measure one eye's height relative to its width.
+
+    Args:
+        landmarks: Sequence of MediaPipe face landmarks.
+        top_index: Landmark at the top of the eye.
+        bottom_index: Landmark at the bottom of the eye.
+        outer_index: Landmark at the outer eye corner.
+        inner_index: Landmark at the inner eye corner.
+        width: Image width in pixels.
+        height: Image height in pixels.
+
+    Returns:
+        Eye height divided by eye width, or 1.0 for zero width.
+    """
     top = landmark_xy(
         landmarks,
         top_index,
         width,
-        height,
+        height
     )
 
     bottom = landmark_xy(
         landmarks,
         bottom_index,
         width,
-        height,
+        height
     )
 
     outer = landmark_xy(
         landmarks,
         outer_index,
         width,
-        height,
+        height
     )
 
     inner = landmark_xy(
         landmarks,
         inner_index,
         width,
-        height,
+        height
     )
 
     vertical = euclidean(
         top,
-        bottom,
+        bottom
     )
 
     horizontal = euclidean(
         outer,
-        inner,
+        inner
     )
 
     if horizontal == 0:
@@ -162,8 +232,18 @@ def eye_aspect_ratio(
 def eyes_are_closed(
     landmarks,
     width,
-    height,
+    height
 ):
+    """Decide whether the average eye opening is below the threshold.
+
+    Args:
+        landmarks: MediaPipe face landmarks containing both eyes.
+        width: Image width in pixels.
+        height: Image height in pixels.
+
+    Returns:
+        True when the eyes appear closed; otherwise False.
+    """
     left_ratio = eye_aspect_ratio(
         landmarks,
         LEFT_EYE_TOP,
@@ -171,7 +251,7 @@ def eyes_are_closed(
         LEFT_EYE_OUTER,
         LEFT_EYE_INNER,
         width,
-        height,
+        height
     )
 
     right_ratio = eye_aspect_ratio(
@@ -181,7 +261,7 @@ def eyes_are_closed(
         RIGHT_EYE_OUTER,
         RIGHT_EYE_INNER,
         width,
-        height,
+        height
     )
 
     average_ratio = (
@@ -199,16 +279,26 @@ def eyes_are_closed(
 def horizontal_gaze_ratio(
     iris_center,
     outer_corner,
-    inner_corner,
+    inner_corner
 ):
+    """Locate an iris between the left and right eye corners.
+
+    Args:
+        iris_center: Iris center as an (x, y) pixel point.
+        outer_corner: Outer eye corner as an (x, y) pixel point.
+        inner_corner: Inner eye corner as an (x, y) pixel point.
+
+    Returns:
+        Horizontal position from 0.0 to 1.0, or 0.5 for zero width.
+    """
     left_bound = min(
         outer_corner[0],
-        inner_corner[0],
+        inner_corner[0]
     )
 
     right_bound = max(
         outer_corner[0],
-        inner_corner[0],
+        inner_corner[0]
     )
 
     eye_width = (
@@ -225,23 +315,33 @@ def horizontal_gaze_ratio(
     return clamp(
         ratio,
         0.0,
-        1.0,
+        1.0
     )
 
 
 def vertical_gaze_ratio(
     iris_center,
     eye_top,
-    eye_bottom,
+    eye_bottom
 ):
+    """Locate an iris between the top and bottom of an eye.
+
+    Args:
+        iris_center: Iris center as an (x, y) pixel point.
+        eye_top: Top of the eye as an (x, y) pixel point.
+        eye_bottom: Bottom of the eye as an (x, y) pixel point.
+
+    Returns:
+        Vertical position from 0.0 to 1.0, or 0.5 for zero height.
+    """
     top_bound = min(
         eye_top[1],
-        eye_bottom[1],
+        eye_bottom[1]
     )
 
     bottom_bound = max(
         eye_top[1],
-        eye_bottom[1],
+        eye_bottom[1]
     )
 
     eye_height = (
@@ -258,107 +358,118 @@ def vertical_gaze_ratio(
     return clamp(
         ratio,
         0.0,
-        1.0,
+        1.0
     )
 
 
 def calculate_gaze(
     landmarks,
     width,
-    height,
+    height
 ):
+    """Measure gaze in both eyes and return their average positions.
+
+    Args:
+        landmarks: MediaPipe face landmarks containing both eyes and irises.
+        width: Image width in pixels.
+        height: Image height in pixels.
+
+    Returns:
+        Horizontal ratio, vertical ratio, left iris center, and right iris
+        center. Iris centers are (x, y) pixel points.
+    """
     left_iris_center = average_point(
         landmarks,
         LEFT_IRIS,
         width,
-        height,
+        height
     )
 
     right_iris_center = average_point(
         landmarks,
         RIGHT_IRIS,
         width,
-        height,
+        height
     )
 
     left_outer = landmark_xy(
         landmarks,
         LEFT_EYE_OUTER,
         width,
-        height,
+        height
     )
 
     left_inner = landmark_xy(
         landmarks,
         LEFT_EYE_INNER,
         width,
-        height,
+        height
     )
 
     right_inner = landmark_xy(
         landmarks,
         RIGHT_EYE_INNER,
         width,
-        height,
+        height
     )
 
     right_outer = landmark_xy(
         landmarks,
         RIGHT_EYE_OUTER,
         width,
-        height,
+        height
     )
 
     left_top = landmark_xy(
         landmarks,
         LEFT_EYE_TOP,
         width,
-        height,
+        height
     )
 
     left_bottom = landmark_xy(
         landmarks,
         LEFT_EYE_BOTTOM,
         width,
-        height,
+        height
     )
 
     right_top = landmark_xy(
         landmarks,
         RIGHT_EYE_TOP,
         width,
-        height,
+        height
     )
 
     right_bottom = landmark_xy(
         landmarks,
         RIGHT_EYE_BOTTOM,
         width,
-        height,
+        height
     )
 
     left_horizontal = horizontal_gaze_ratio(
         left_iris_center,
         left_outer,
-        left_inner,
+        left_inner
     )
 
     right_horizontal = horizontal_gaze_ratio(
         right_iris_center,
         right_inner,
-        right_outer,
+        right_outer
     )
 
     left_vertical = vertical_gaze_ratio(
         left_iris_center,
         left_top,
-        left_bottom,
+        left_bottom
     )
 
     right_vertical = vertical_gaze_ratio(
         right_iris_center,
         right_top,
-        right_bottom,
+        right_bottom
     )
 
     # STEP 3: Average the left and right eye ratios for each direction.
@@ -369,7 +480,7 @@ def calculate_gaze(
         horizontal,
         vertical,
         left_iris_center,
-        right_iris_center,
+        right_iris_center
     )
 
 
@@ -377,8 +488,19 @@ def gaze_direction(
     horizontal,
     vertical,
     center_horizontal,
-    center_vertical,
+    center_vertical
 ):
+    """Compare current gaze with the calibrated screen-facing position.
+
+    Args:
+        horizontal: Current horizontal gaze ratio.
+        vertical: Current vertical gaze ratio.
+        center_horizontal: Calibrated horizontal gaze ratio.
+        center_vertical: Calibrated vertical gaze ratio.
+
+    Returns:
+        "side", "up", "down", or "center" after applying gaze margins.
+    """
     if (
         horizontal
         < center_horizontal
