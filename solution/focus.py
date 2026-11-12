@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from config import CALIBRATION_SECONDS, DISTRACTION_SECONDS, GAZE_SMOOTHING_FRAMES
 from vision import gaze_direction
 
+Measurement = tuple[str, bool, float, float]
+
 
 @dataclass(frozen=True)
 class FocusStatus:
@@ -31,7 +33,7 @@ class FocusStatus:
 class FocusTracker:
     """Track calibration and state across camera frames."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Start with empty gaze history and no calibrated center."""
 
         self.horizontal = deque(maxlen=GAZE_SMOOTHING_FRAMES)
@@ -43,7 +45,7 @@ class FocusTracker:
         self.distracted_since = None
         self.triggered = False
 
-    def update(self, now, measurement=None):
+    def update(self, now: float, measurement: Measurement | None = None) -> FocusStatus:
         """Update calibration or focus state from one camera frame.
 
         Args:
