@@ -31,7 +31,21 @@ class FocusStatus:
 
 
 class FocusTracker:
-    """Track calibration and state across camera frames."""
+    """Track calibration and focus state across camera frames.
+
+    Attributes:
+        horizontal: Recent horizontal gaze readings used for smoothing.
+        vertical: Recent vertical gaze readings used for smoothing.
+        calibration_horizontal: Horizontal readings collected for calibration.
+        calibration_vertical: Vertical readings collected for calibration.
+        calibration_start: Monotonic time when the current calibration began,
+            or None before a face is visible.
+        center: Calibrated horizontal and vertical gaze values, or None until
+            calibration finishes.
+        distracted_since: Monotonic time when the current distraction began,
+            or None while focused or calibrating.
+        triggered: Whether the current focus loss has already fired an action.
+    """
 
     def __init__(self) -> None:
         """Start with empty gaze history and no calibrated center."""
