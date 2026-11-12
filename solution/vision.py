@@ -1,5 +1,17 @@
-from config import HEAD_TURN_THRESHOLD, EYE_CLOSED_THRESHOLD, GAZE_HORIZONTAL_MARGIN, GAZE_VERTICAL_MARGIN
 import math
+from typing import Protocol, Sequence
+
+from config import HEAD_TURN_THRESHOLD, EYE_CLOSED_THRESHOLD, GAZE_HORIZONTAL_MARGIN, GAZE_VERTICAL_MARGIN
+
+
+class Landmark(Protocol):
+    """A face landmark with normalized image coordinates."""
+
+    x: float
+    y: float
+
+
+Point = tuple[float, float]
 
 LEFT_EYE_OUTER = 33
 LEFT_EYE_INNER = 133
@@ -19,7 +31,9 @@ RIGHT_IRIS = [473, 474, 475, 476, 477]
 NOSE_TIP = 1
 LEFT_FACE = 234
 RIGHT_FACE = 454
-def clamp(value, minimum, maximum):
+
+
+def clamp(value: float, minimum: float, maximum: float) -> float:
     """Keep a number within an inclusive range.
 
     Args:
@@ -37,11 +51,11 @@ def clamp(value, minimum, maximum):
 
 
 def landmark_xy(
-    landmarks,
-    index,
-    width,
-    height
-):
+    landmarks: Sequence[Landmark],
+    index: int,
+    width: int,
+    height: int
+) -> tuple[int, int]:
     """Convert a normalized face landmark to image pixel coordinates.
 
     Args:
@@ -64,7 +78,7 @@ def landmark_xy(
     )
 
 
-def euclidean(p1, p2):
+def euclidean(p1: Point, p2: Point) -> float:
     """Measure the straight-line distance between two image points.
 
     Args:
@@ -81,11 +95,11 @@ def euclidean(p1, p2):
 
 
 def average_point(
-    landmarks,
-    indices,
-    width,
-    height
-):
+    landmarks: Sequence[Landmark],
+    indices: Sequence[int],
+    width: int,
+    height: int
+) -> Point:
     """Find the center of several face landmarks in image pixels.
 
     Args:
@@ -125,7 +139,7 @@ def average_point(
 # HEAD TRACKING
 # ============================================================
 
-def head_direction(landmarks):
+def head_direction(landmarks: Sequence[Landmark]) -> str:
     """Estimate whether the head points left, right, or center.
 
     Args:
@@ -167,14 +181,14 @@ def head_direction(landmarks):
 # ============================================================
 
 def eye_aspect_ratio(
-    landmarks,
-    top_index,
-    bottom_index,
-    outer_index,
-    inner_index,
-    width,
-    height
-):
+    landmarks: Sequence[Landmark],
+    top_index: int,
+    bottom_index: int,
+    outer_index: int,
+    inner_index: int,
+    width: int,
+    height: int
+) -> float:
     """Measure one eye's height relative to its width.
 
     Args:
@@ -234,10 +248,10 @@ def eye_aspect_ratio(
 
 
 def eyes_are_closed(
-    landmarks,
-    width,
-    height
-):
+    landmarks: Sequence[Landmark],
+    width: int,
+    height: int
+) -> bool:
     """Decide whether the average eye opening is below the threshold.
 
     Args:
@@ -283,10 +297,10 @@ def eyes_are_closed(
 # ============================================================
 
 def horizontal_gaze_ratio(
-    iris_center,
-    outer_corner,
-    inner_corner
-):
+    iris_center: Point,
+    outer_corner: Point,
+    inner_corner: Point
+) -> float:
     """Locate an iris between the left and right eye corners.
 
     Args:
@@ -326,10 +340,10 @@ def horizontal_gaze_ratio(
 
 
 def vertical_gaze_ratio(
-    iris_center,
-    eye_top,
-    eye_bottom
-):
+    iris_center: Point,
+    eye_top: Point,
+    eye_bottom: Point
+) -> float:
     """Locate an iris between the top and bottom of an eye.
 
     Args:
@@ -369,10 +383,10 @@ def vertical_gaze_ratio(
 
 
 def calculate_gaze(
-    landmarks,
-    width,
-    height
-):
+    landmarks: Sequence[Landmark],
+    width: int,
+    height: int
+) -> tuple[float, float, Point, Point]:
     """Measure gaze in both eyes and return their average positions.
 
     Args:
@@ -497,11 +511,11 @@ def calculate_gaze(
 
 
 def gaze_direction(
-    horizontal,
-    vertical,
-    center_horizontal,
-    center_vertical
-):
+    horizontal: float,
+    vertical: float,
+    center_horizontal: float,
+    center_vertical: float
+) -> str:
     """Compare current gaze with the calibrated screen-facing position.
 
     Args:
