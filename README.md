@@ -4,7 +4,7 @@ This is a **code-along starter**, not the full Dopaminehub app. We will use a we
 
 ## Before the session
 
-Use Python 3.11 or newer and a webcam. In a terminal in this folder, create a fresh environment so the workshop uses its own OpenCV installation. If your prompt starts with `(base)`, you are in Conda's base environment; the activation step below should change the prompt to `(.venv)`.
+Use Python 3.11 or newer and a webcam. In a terminal in this folder:
 
 ```bash
 python -m venv .venv
@@ -26,15 +26,6 @@ Then install and run:
 python -m pip install -r requirements.txt
 python main.py
 ```
-
-On macOS, if `python` points to Conda's base environment, use `python3 -m venv .venv` to create the environment, then activate it and run the same install commands. Check that the active Python and OpenCV are correct:
-
-```bash
-which python
-python -c "import cv2; print(cv2.__file__); print(cv2.__version__); print(hasattr(cv2, 'CascadeClassifier'))"
-```
-
-`which python` should point inside this project's `.venv`. The last line of the check should print `True`. If it prints `False`, remove the broken `.venv`, recreate it, activate it, and install again. Do not run the workshop from Conda's `(base)` environment.
 
 Allow camera access if your computer asks. A webcam window should appear. Press **Q** while that window is active to quit. If `python` is unavailable, try `python3` (and `py` on Windows). The face detector is included with OpenCV; no separate model download is needed.
 
