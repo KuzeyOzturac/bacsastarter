@@ -24,6 +24,16 @@ WINDOW_TITLE = "Focus Detector"
 
 
 def find_and_click_mute_icon():
+    """Search screenshots for the mute icon and click the best match.
+
+    The search tries multiple template sizes until a match reaches the score
+    threshold or the search timeout expires.
+
+    Returns:
+        True when a candidate icon is clicked; otherwise False. A click does
+        not confirm that Instagram actually unmuted the Reel.
+    """
+
     if not MUTE_ICON_PATH.exists():
         print(f"ERROR: mute icon was not found: {MUTE_ICON_PATH}")
         return False
@@ -76,6 +86,8 @@ def find_and_click_mute_icon():
 
 
 def shrink_and_front_capture_window():
+    """Resize the camera window and bring it to the front of the screen."""
+
     screen_width, screen_height = pyautogui.size()
     cv2.namedWindow(WINDOW_TITLE, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(WINDOW_TITLE, screen_width // 3, screen_height // 3)
@@ -90,6 +102,13 @@ def shrink_and_front_capture_window():
 
 
 def open_reels():
+    """Open Reels, try to unmute it, and restore the camera window.
+
+    Returns:
+        True when the browser opens and a mute-icon candidate is clicked;
+        otherwise False.
+    """
+
     print("Opening Instagram Reels...")
     if not webbrowser.open(REELS_URL):
         print("Could not open Instagram Reels in a browser.")
@@ -103,6 +122,8 @@ def open_reels():
 
 
 def next_reel():
+    """Scroll toward the next Reel and wait briefly for it to load."""
+
     print("Scrolling to next Reel...")
     pyautogui.scroll(REEL_SCROLL_AMOUNT)
     time.sleep(NEXT_REEL_LOAD_SECONDS)
