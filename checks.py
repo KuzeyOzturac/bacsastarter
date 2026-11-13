@@ -148,6 +148,19 @@ class Step3(unittest.TestCase):
         sequence.update(0.3, 0.5, False, True, 3)
         self.assertEqual(sequence.index, 1)
 
+    def test_up_and_down_survive_sideways_drift(self):
+        from gaze_demo import GazeSequence
+
+        sequence = GazeSequence()
+        sequence.center = (0.497, 0.423)
+        sequence.index = 3
+        sequence.update(0.570, 0.388, True, True, 0)
+        sequence.update(0.570, 0.388, True, True, 0.5)
+        self.assertEqual(sequence.index, 4)
+        sequence.update(0.430, 0.465, True, True, 1)
+        sequence.update(0.430, 0.465, True, True, 1.5)
+        self.assertEqual(sequence.index, 5)
+
 
 class Step4(unittest.TestCase):
     def test_calibration_and_smoothing(self):

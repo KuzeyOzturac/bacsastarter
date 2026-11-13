@@ -58,6 +58,8 @@ vertical = (left_vertical + right_vertical) / 2
 
 **Webcam check:** Run `python checks.py 3 --webcam`. Keep your head still and follow **Center → Left → Right → Up → Down → Center** with your eyes. Look at the screen during the first Center step so the check can capture a short reference. Hold each later gaze briefly. Completed directions turn green; the final one displays **TASK COMPLETE!** Eye landmarks and iris centers appear on your face. The panel shows horizontal and vertical gaze ratios, the center reference, and the margins. Press **R** to start over with a new center reference or **Q** to quit. This short reference belongs only to the check; Step 4 builds the app's full calibration and smoothing.
 
+The webcam check uses a more sensitive vertical margin of `0.03` to demonstrate small iris movements. The app's focus decision still uses `GAZE_VERTICAL_MARGIN = 0.08`. During the Up and Down tasks, the check follows vertical movement even if the eyes drift sideways slightly.
+
 ## Step 4 — smoothing and calibration (12 minutes)
 
 In `starter/focus.py`, fill both `STEP 4` gaps. After appending each reading to its `deque`, average the recent values:

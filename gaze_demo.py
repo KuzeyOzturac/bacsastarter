@@ -3,13 +3,16 @@
 import time
 
 from blink_demo import draw_eye_landmarks
-from config import GAZE_HORIZONTAL_MARGIN, GAZE_VERTICAL_MARGIN
+from config import GAZE_HORIZONTAL_MARGIN
 from vision import calculate_gaze, eyes_are_closed, head_direction
 
 
 DIRECTIONS = ("center", "left", "right", "up", "down", "center")
 CENTER_SECONDS = 0.8
 HOLD_SECONDS = 0.4
+# This checkpoint tests whether gaze measurements move. The full app keeps
+# GAZE_VERTICAL_MARGIN for its focus decision in Step 4.
+DEMO_VERTICAL_MARGIN = 0.03
 
 
 class GazeSequence:
@@ -26,21 +29,22 @@ class GazeSequence:
     def complete(self):
         return self.index == len(DIRECTIONS)
 
-    def direction(self, horizontal, vertical):
-        """Classify a reading relative to this check's center reference."""
+    def matches_target(self, horizontal, vertical):
+        """Check the current task's axis against the center reference."""
         if self.center is None or horizontal is None or vertical is None:
-            return None
+            return False
         delta_h = horizontal - self.center[0]
         delta_v = vertical - self.center[1]
-        if delta_h < -GAZE_HORIZONTAL_MARGIN:
-            return "left"
-        if delta_h > GAZE_HORIZONTAL_MARGIN:
-            return "right"
-        if delta_v < -GAZE_VERTICAL_MARGIN:
-            return "up"
-        if delta_v > GAZE_VERTICAL_MARGIN:
-            return "down"
-        return "center"
+        target = DIRECTIONS[self.index]
+        if target == "left":
+            return delta_h < -GAZE_HORIZONTAL_MARGIN
+        if target == "right":
+            return delta_h > GAZE_HORIZONTAL_MARGIN
+        if target == "up":
+            return delta_v < -DEMO_VERTICAL_MARGIN
+        if target == "down":
+            return delta_v > DEMO_VERTICAL_MARGIN
+        return abs(delta_h) <= GAZE_HORIZONTAL_MARGIN and abs(delta_v) <= DEMO_VERTICAL_MARGIN
 
     def update(self, horizontal, vertical, head_centered, eyes_open, now):
         """Advance after valid center capture or a held target direction."""
@@ -68,7 +72,7 @@ class GazeSequence:
                 self.index = 1
             return
 
-        if self.direction(horizontal, vertical) != DIRECTIONS[self.index]:
+        if not self.matches_target(horizontal, vertical):
             self.hold_start = None
         elif self.hold_start is None:
             self.hold_start = now
@@ -105,7 +109,9 @@ def draw_panel(cv2, panel, sequence, horizontal, vertical, head_centered, eyes_o
     elif sequence.center is None:
         message, color = "LOOK AT CENTER", amber
     else:
-        message, color = f"Detected: {sequence.direction(horizontal, vertical)}", white
+        target = DIRECTIONS[sequence.index].upper()
+        message = f"{target}: {'MATCH' if sequence.matches_target(horizontal, vertical) else 'WAIT'}"
+        color = white
     cv2.putText(panel, message, (20, 340), font, 0.54, color, 2, cv2.LINE_AA)
 
     h_text = f"{horizontal:.3f}" if horizontal is not None else "N/A"
@@ -115,8 +121,12 @@ def draw_panel(cv2, panel, sequence, horizontal, vertical, head_centered, eyes_o
     cv2.putText(panel, f"Horizontal: {h_text}", (20, 380), font, 0.53, white, 1, cv2.LINE_AA)
     cv2.putText(panel, f"Vertical: {v_text}", (20, 410), font, 0.53, white, 1, cv2.LINE_AA)
     cv2.putText(panel, f"Center H,V: {center_text}", (20, 440), font, 0.49, white, 1, cv2.LINE_AA)
-    cv2.putText(panel, f"Margins H,V: {GAZE_HORIZONTAL_MARGIN:.2f}, {GAZE_VERTICAL_MARGIN:.2f}",
+    cv2.putText(panel, f"Check margins H,V: {GAZE_HORIZONTAL_MARGIN:.2f}, {DEMO_VERTICAL_MARGIN:.2f}",
                 (20, 470), font, 0.48, white, 1, cv2.LINE_AA)
+    if sequence.center and horizontal is not None and vertical is not None:
+        delta_text = (f"Delta H,V: {horizontal - sequence.center[0]:+.3f}, "
+                      f"{vertical - sequence.center[1]:+.3f}")
+        cv2.putText(panel, delta_text, (20, 495), font, 0.46, white, 1, cv2.LINE_AA)
     cv2.putText(panel, "R: recenter   Q: quit", (20, 520), font, 0.48, gray, 1, cv2.LINE_AA)
 
 
