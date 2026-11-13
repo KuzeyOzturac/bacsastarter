@@ -29,7 +29,9 @@ if offset > HEAD_TURN_THRESHOLD:
 return "center"
 ```
 
-**Check:** `python checks.py 1` should pass. Why are there negative and positive thresholds?
+**Logic check:** `python checks.py 1` should pass. Why are there negative and positive thresholds?
+
+**Webcam check:** Run `python checks.py 1 --webcam`. Follow **Center → Left → Right → Center** with your head. Hold each position briefly. Each finished direction turns green, and the window says **TASK COMPLETE!** after the fourth. The left-side, right-side, and nose landmarks are drawn on your face; the current offset and `HEAD_TURN_THRESHOLD` appear beside the video. Press **Q** to close the window. This check uses the `head_direction()` you just completed in `starter/vision.py`.
 
 ## Step 2 — eye closure (8 minutes)
 

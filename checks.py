@@ -54,6 +54,25 @@ class Step1(unittest.TestCase):
         points[1].x = 0.7
         self.assertEqual(head_direction(points), "right")
 
+    def test_head_sequence_requires_order_and_steady_pose(self):
+        from head_demo import HeadSequence
+
+        sequence = HeadSequence()
+        sequence.update("left", 0)
+        self.assertEqual(sequence.index, 0)
+        sequence.update("center", 1)
+        sequence.update("center", 1.7)
+        self.assertEqual(sequence.index, 1)
+        sequence.update("right", 2)
+        self.assertEqual(sequence.index, 1)
+        sequence.update("left", 3)
+        sequence.update("left", 3.7)
+        sequence.update("right", 4)
+        sequence.update("right", 4.7)
+        sequence.update("center", 5)
+        sequence.update("center", 5.7)
+        self.assertTrue(sequence.complete)
+
 
 class Step2(unittest.TestCase):
     def test_eyes_closed_and_open(self):
@@ -149,7 +168,18 @@ class Step7(unittest.TestCase):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check one BACSA workshop step")
     parser.add_argument("step", type=int, choices=range(1, 8))
+    parser.add_argument("--webcam", action="store_true", help="run the live Step 1 head-turn check")
     args = parser.parse_args()
+    if args.webcam and args.step != 1:
+        parser.error("--webcam is available for Step 1 only")
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(globals()[f"Step{args.step}"])
     result = unittest.TextTestRunner(verbosity=2).run(suite)
-    sys.exit(0 if result.wasSuccessful() else 1)
+    if not result.wasSuccessful():
+        sys.exit(1)
+    if args.webcam:
+        from head_demo import run
+
+        print("Follow Center, Left, Right, Center on screen. Press Q when finished.")
+        completed = run()
+        print("Step 1 webcam task complete." if completed else "Step 1 webcam task incomplete.")
+        sys.exit(0 if completed else 1)
