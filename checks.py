@@ -84,6 +84,22 @@ class Step2(unittest.TestCase):
             points[index].y = 0.51
         self.assertTrue(eyes_are_closed(points, 1000, 1000))
 
+    def test_three_blinks_require_closing_and_reopening(self):
+        from blink_demo import BlinkSequence
+
+        sequence = BlinkSequence()
+        sequence.update(True, 0)
+        self.assertEqual(sequence.count, 0)
+        for start in (1.0, 2.0, 3.0):
+            sequence.update(False, start)
+            sequence.update(False, start + 0.15)
+            sequence.update(True, start + 0.20)
+            sequence.update(True, start + 0.28)
+            self.assertEqual(sequence.count, int(start - 1))
+            sequence.update(False, start + 0.35)
+            self.assertEqual(sequence.count, int(start))
+        self.assertTrue(sequence.complete)
+
 
 class Step3(unittest.TestCase):
     def test_gaze_ratios_change_with_iris(self):
@@ -168,18 +184,23 @@ class Step7(unittest.TestCase):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check one BACSA workshop step")
     parser.add_argument("step", type=int, choices=range(1, 8))
-    parser.add_argument("--webcam", action="store_true", help="run the live Step 1 head-turn check")
+    parser.add_argument("--webcam", action="store_true", help="run the live Step 1 or 2 webcam check")
     args = parser.parse_args()
-    if args.webcam and args.step != 1:
-        parser.error("--webcam is available for Step 1 only")
+    if args.webcam and args.step not in (1, 2):
+        parser.error("--webcam is available for Steps 1 and 2 only")
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(globals()[f"Step{args.step}"])
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():
         sys.exit(1)
     if args.webcam:
-        from head_demo import run
+        if args.step == 1:
+            from head_demo import run
 
-        print("Follow Center, Left, Right, Center on screen. Press Q when finished.")
+            print("Follow Center, Left, Right, Center on screen. Press Q when finished.")
+        else:
+            from blink_demo import run
+
+            print("Blink three times on screen. Press Q when finished.")
         completed = run()
-        print("Step 1 webcam task complete." if completed else "Step 1 webcam task incomplete.")
+        print(f"Step {args.step} webcam task {'complete' if completed else 'incomplete'}.")
         sys.exit(0 if completed else 1)

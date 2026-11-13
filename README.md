@@ -41,7 +41,9 @@ In `starter/vision.py`, find `STEP 2`. The code divides each eye's height by its
 return average_ratio < EYE_CLOSED_THRESHOLD
 ```
 
-**Check:** `python checks.py 2` should pass for both open and closed sample eyes.
+**Logic check:** `python checks.py 2` should pass for both open and closed sample eyes.
+
+**Webcam check:** Run `python checks.py 2 --webcam`. Blink three times. Each blink turns green only after your eyes close and reopen; then the window says **TASK COMPLETE!** The top, bottom, inner, and outer landmarks for both eyes are marked on your face. The left and right eye aspect ratios, their average, and `EYE_CLOSED_THRESHOLD` appear beside the video. Press **Q** to close the window. This check uses the `eyes_are_closed()` you just completed in `starter/vision.py`.
 
 ## Step 3 — iris gaze (10 minutes)
 
