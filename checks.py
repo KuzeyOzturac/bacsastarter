@@ -114,6 +114,40 @@ class Step3(unittest.TestCase):
         horizontal, _, _, _ = calculate_gaze(points, 1000, 1000)
         self.assertGreater(horizontal, 0.7)
 
+    def test_gaze_sequence_uses_center_reference_and_order(self):
+        from gaze_demo import GazeSequence
+
+        sequence = GazeSequence()
+        sequence.update(None, None, False, False, 0)
+        sequence.update(0.5, 0.5, True, True, 1)
+        sequence.update(0.5, 0.5, True, True, 1.9)
+        self.assertEqual(sequence.index, 1)
+        self.assertEqual(sequence.center, (0.5, 0.5))
+
+        sequence.update(0.7, 0.5, True, True, 2)
+        self.assertEqual(sequence.index, 1)
+        for start, horizontal, vertical, expected in (
+            (3, 0.35, 0.5, 2),
+            (4, 0.65, 0.5, 3),
+            (5, 0.5, 0.35, 4),
+            (6, 0.5, 0.65, 5),
+            (7, 0.5, 0.5, 6)
+        ):
+            sequence.update(horizontal, vertical, True, True, start)
+            sequence.update(horizontal, vertical, True, True, start + 0.5)
+            self.assertEqual(sequence.index, expected)
+        self.assertTrue(sequence.complete)
+
+    def test_gaze_sequence_rejects_head_turns(self):
+        from gaze_demo import GazeSequence
+
+        sequence = GazeSequence()
+        sequence.update(0.5, 0.5, True, True, 0)
+        sequence.update(0.5, 0.5, True, True, 1)
+        sequence.update(0.3, 0.5, False, True, 2)
+        sequence.update(0.3, 0.5, False, True, 3)
+        self.assertEqual(sequence.index, 1)
+
 
 class Step4(unittest.TestCase):
     def test_calibration_and_smoothing(self):
@@ -184,10 +218,10 @@ class Step7(unittest.TestCase):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check one BACSA workshop step")
     parser.add_argument("step", type=int, choices=range(1, 8))
-    parser.add_argument("--webcam", action="store_true", help="run the live Step 1 or 2 webcam check")
+    parser.add_argument("--webcam", action="store_true", help="run the live Step 1, 2, or 3 webcam check")
     args = parser.parse_args()
-    if args.webcam and args.step not in (1, 2):
-        parser.error("--webcam is available for Steps 1 and 2 only")
+    if args.webcam and args.step not in (1, 2, 3):
+        parser.error("--webcam is available for Steps 1, 2, and 3 only")
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(globals()[f"Step{args.step}"])
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():
@@ -197,10 +231,14 @@ if __name__ == "__main__":
             from head_demo import run
 
             print("Follow Center, Left, Right, Center on screen. Press Q when finished.")
-        else:
+        elif args.step == 2:
             from blink_demo import run
 
             print("Blink three times on screen. Press Q when finished.")
+        else:
+            from gaze_demo import run
+
+            print("Follow Center, Left, Right, Up, Down, Center with your eyes. Press R to recenter or Q to quit.")
         completed = run()
         print(f"Step {args.step} webcam task {'complete' if completed else 'incomplete'}.")
         sys.exit(0 if completed else 1)

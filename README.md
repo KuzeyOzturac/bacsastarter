@@ -54,7 +54,9 @@ horizontal = (left_horizontal + right_horizontal) / 2
 vertical = (left_vertical + right_vertical) / 2
 ```
 
-**Check:** `python checks.py 3` moves the sample irises and checks that the result changes.
+**Logic check:** `python checks.py 3` moves the sample irises and checks that the result changes.
+
+**Webcam check:** Run `python checks.py 3 --webcam`. Keep your head still and follow **Center → Left → Right → Up → Down → Center** with your eyes. Look at the screen during the first Center step so the check can capture a short reference. Hold each later gaze briefly. Completed directions turn green; the final one displays **TASK COMPLETE!** Eye landmarks and iris centers appear on your face. The panel shows horizontal and vertical gaze ratios, the center reference, and the margins. Press **R** to start over with a new center reference or **Q** to quit. This short reference belongs only to the check; Step 4 builds the app's full calibration and smoothing.
 
 ## Step 4 — smoothing and calibration (12 minutes)
 
