@@ -113,6 +113,10 @@ class Step3(unittest.TestCase):
             points[index].x = 0.75
         horizontal, _, _, _ = calculate_gaze(points, 1000, 1000)
         self.assertGreater(horizontal, 0.7)
+        for index in range(468, 478):
+            points[index].y = 0.55
+        _, vertical, _, _ = calculate_gaze(points, 1000, 1000)
+        self.assertGreater(vertical, 0.7)
 
     def test_gaze_sequence_uses_center_reference_and_order(self):
         from gaze_demo import GazeSequence
@@ -129,9 +133,7 @@ class Step3(unittest.TestCase):
         for start, horizontal, vertical, expected in (
             (3, 0.35, 0.5, 2),
             (4, 0.65, 0.5, 3),
-            (5, 0.5, 0.35, 4),
-            (6, 0.5, 0.65, 5),
-            (7, 0.5, 0.5, 6)
+            (5, 0.5, 0.5, 4)
         ):
             sequence.update(horizontal, vertical, True, True, start)
             sequence.update(horizontal, vertical, True, True, start + 0.5)
@@ -147,19 +149,6 @@ class Step3(unittest.TestCase):
         sequence.update(0.3, 0.5, False, True, 2)
         sequence.update(0.3, 0.5, False, True, 3)
         self.assertEqual(sequence.index, 1)
-
-    def test_up_and_down_survive_sideways_drift(self):
-        from gaze_demo import GazeSequence
-
-        sequence = GazeSequence()
-        sequence.center = (0.497, 0.423)
-        sequence.index = 3
-        sequence.update(0.570, 0.388, True, True, 0)
-        sequence.update(0.570, 0.388, True, True, 0.5)
-        self.assertEqual(sequence.index, 4)
-        sequence.update(0.430, 0.465, True, True, 1)
-        sequence.update(0.430, 0.465, True, True, 1.5)
-        self.assertEqual(sequence.index, 5)
 
 
 class Step4(unittest.TestCase):
@@ -251,7 +240,7 @@ if __name__ == "__main__":
         else:
             from gaze_demo import run
 
-            print("Follow Center, Left, Right, Up, Down, Center with your eyes. Press R to recenter or Q to quit.")
+            print("Follow Center, Left, Right, Center with your eyes. Press R to recenter or Q to quit.")
         completed = run()
         print(f"Step {args.step} webcam task {'complete' if completed else 'incomplete'}.")
         sys.exit(0 if completed else 1)
