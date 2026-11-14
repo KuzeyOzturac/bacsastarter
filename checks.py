@@ -179,6 +179,34 @@ class Step5(unittest.TestCase):
         tracker.update(8, away)
         self.assertTrue(tracker.update(9, away).trigger)
 
+    def test_live_challenge_counts_two_separate_events(self):
+        from focus_demo import FocusChallenge
+
+        challenge = FocusChallenge()
+        def status(text, trigger=False):
+            return SimpleNamespace(text=text, trigger=trigger)
+
+        challenge.update(status("CALIBRATING"), False, 0)
+        challenge.update(status("FOCUSED"), True, 3)
+        challenge.update(status("FOCUS LOST", True), True, 5)
+        self.assertEqual(challenge.trigger_count, 1)
+        challenge.update(status("FOCUS LOST"), True, 6.1)
+        challenge.update(status("FOCUSED"), True, 7)
+        challenge.update(status("FOCUSED"), True, 7.5)
+        challenge.update(status("FOCUS LOST", True), True, 9)
+        self.assertTrue(challenge.complete)
+        self.assertEqual(challenge.trigger_count, 2)
+
+    def test_live_challenge_flags_repeated_event(self):
+        from focus_demo import FocusChallenge
+
+        challenge = FocusChallenge()
+        challenge.update(SimpleNamespace(text="FOCUSED", trigger=False), True, 0)
+        challenge.update(SimpleNamespace(text="FOCUS LOST", trigger=True), True, 1)
+        challenge.update(SimpleNamespace(text="FOCUS LOST", trigger=True), True, 2)
+        self.assertTrue(challenge.repeated_trigger)
+        self.assertFalse(challenge.complete)
+
 
 class Step6(unittest.TestCase):
     def test_mute_match_clicks_template_center(self):
@@ -220,10 +248,10 @@ class Step7(unittest.TestCase):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check one BACSA workshop step")
     parser.add_argument("step", type=int, choices=range(1, 8))
-    parser.add_argument("--webcam", action="store_true", help="run the live Step 1, 2, or 3 webcam check")
+    parser.add_argument("--webcam", action="store_true", help="run the live Step 1 through 5 webcam check")
     args = parser.parse_args()
-    if args.webcam and args.step not in (1, 2, 3):
-        parser.error("--webcam is available for Steps 1, 2, and 3 only")
+    if args.webcam and args.step not in (1, 2, 3, 4, 5):
+        parser.error("--webcam is available for Steps 1 through 5 only")
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(globals()[f"Step{args.step}"])
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():
@@ -237,10 +265,14 @@ if __name__ == "__main__":
             from blink_demo import run
 
             print("Blink three times on screen. Press Q when finished.")
-        else:
+        elif args.step == 3:
             from gaze_demo import run
 
             print("Follow Center, Left, Right, Center with your eyes. Press R to recenter or Q to quit.")
-        completed = run()
+        else:
+            from focus_demo import run
+
+            print(f"Follow the Step {args.step} prompts. Press R to restart or Q to quit.")
+        completed = run(args.step) if args.step in (4, 5) else run()
         print(f"Step {args.step} webcam task {'complete' if completed else 'incomplete'}.")
         sys.exit(0 if completed else 1)

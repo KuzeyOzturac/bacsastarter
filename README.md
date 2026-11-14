@@ -76,7 +76,9 @@ self.center = (
 )
 ```
 
-**Check:** `python checks.py 4` should pass. Why learn *your* center instead of assuming everyone's is `0.5`?
+**Logic check:** `python checks.py 4` should pass. Why learn *your* center instead of assuming everyone's is `0.5`?
+
+**Webcam check:** Run `python checks.py 4 --webcam`. Look at the screen for the three-second calibration. The window shows the countdown, raw and smoothed gaze values, the learned center, and a graph of recent raw and smoothed horizontal readings. After calibration and five more visible-face frames, both tasks turn green and **TASK COMPLETE!** appears. Move your eyes sideways to compare the two graph lines. Press **R** to restart or **Q** to quit.
 
 ## Step 5 — timed, one-shot focus loss (10 minutes)
 
@@ -87,7 +89,9 @@ trigger = not self.triggered
 self.triggered = True
 ```
 
-The existing focused branch resets `self.triggered`. **Check:** `python checks.py 5` should pass. What if the flag were never reset?
+The existing focused branch resets `self.triggered`. **Logic check:** `python checks.py 5` should pass. What if the flag were never reset?
+
+**Webcam check:** Run `python checks.py 5 --webcam`. Calibrate while looking at the screen. Turn your head away for more than one second to cause one trigger. Keep looking away briefly and verify the counter stays at **1**. Look back until the app reports `FOCUSED`, then turn away again for a second trigger. Each task turns green, and the window displays **TASK COMPLETE!** at the end. This check never opens Reels. Press **R** to restart or **Q** to quit.
 
 ## Step 6 — find and click the mute icon (15 minutes)
 
