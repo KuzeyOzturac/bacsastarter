@@ -234,6 +234,17 @@ class Step6(unittest.TestCase):
         self.assertAlmostEqual(x, 450 + width / 2, delta=2)
         self.assertAlmostEqual(y, 450 + height / 2, delta=2)
 
+    def test_live_result_marks_click_location(self):
+        import cv2
+        import numpy as np
+        from PIL import Image
+        from reels_demo import draw_result
+
+        screenshot = Image.fromarray(np.zeros((1000, 1000, 3), dtype=np.uint8))
+        view = draw_result(cv2, np, screenshot, (500, 500), True, (1000, 1000))
+        self.assertEqual(view.shape, (600, 950, 3))
+        self.assertGreater(int(view[300, 300, 1]), 100)
+
 
 class Step7(unittest.TestCase):
     def test_next_reel_scrolls_once(self):
@@ -249,9 +260,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Check one BACSA workshop step")
     parser.add_argument("step", type=int, choices=range(1, 8))
     parser.add_argument("--webcam", action="store_true", help="run the live Step 1 through 5 webcam check")
+    parser.add_argument("--live", action="store_true", help="open Reels and click its mute icon in Step 6")
     args = parser.parse_args()
+    if args.webcam and args.live:
+        parser.error("choose --webcam or --live, not both")
     if args.webcam and args.step not in (1, 2, 3, 4, 5):
         parser.error("--webcam is available for Steps 1 through 5 only")
+    if args.live and args.step != 6:
+        parser.error("--live is available for Step 6 only")
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(globals()[f"Step{args.step}"])
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     if not result.wasSuccessful():
@@ -275,4 +291,11 @@ if __name__ == "__main__":
             print(f"Follow the Step {args.step} prompts. Press R to restart or Q to quit.")
         completed = run(args.step) if args.step in (4, 5) else run()
         print(f"Step {args.step} webcam task {'complete' if completed else 'incomplete'}.")
+        sys.exit(0 if completed else 1)
+    if args.live:
+        from reels_demo import run
+
+        print("Opening Reels and searching for the mute icon. Press Q in the result window to quit.")
+        completed = run()
+        print("Step 6 live task complete." if completed else "Step 6 live task incomplete.")
         sys.exit(0 if completed else 1)

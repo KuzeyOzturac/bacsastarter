@@ -108,7 +108,9 @@ print(f"Reels unmuted (match score {best_score:.3f}).")
 return True
 ```
 
-The scale divisions turn screenshot pixels into screen coordinates. **Check:** `python checks.py 6` uses a fake screenshot and verifies the click location. It does not click your screen.
+The scale divisions turn screenshot pixels into screen coordinates. **Logic check:** `python checks.py 6` uses a fake screenshot and verifies the click location. It does not click your screen.
+
+**Live check:** Run `python checks.py 6 --live`. It opens Instagram Reels in your browser, uses your real screen to find the mute icon, and actually clicks the match. A result window then shows the screenshot it searched, the search region, and the click point. **TASK COMPLETE!** means a candidate icon was clicked; confirm that the Reel actually unmuted. Press **Q** in the result window to quit. This check does not use your webcam.
 
 ## Step 7 — connect browser actions (10 minutes)
 
