@@ -2,7 +2,7 @@
 
 import time
 
-from blink_demo import draw_eye_landmarks
+from .blink_demo import draw_eye_landmarks
 from config import GAZE_HORIZONTAL_MARGIN
 from vision import calculate_gaze, eyes_are_closed, head_direction
 

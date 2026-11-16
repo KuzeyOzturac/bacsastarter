@@ -2,7 +2,7 @@
 
 Build the original feature path together: **webcam landmarks → head and eye measurements → gaze → calibration and smoothing → timed focus loss → open and unmute Reels → scroll on later focus losses**.
 
-[starter/](starter/) has seven marked gaps. Fill one gap, run its check, then move on. [solution/](solution/) has the completed project. Allow about 75–90 minutes. The checks cover logic; the final camera and browser test needs a Mac with permissions.
+[starter/](starter/) has seven marked gaps. Fill one gap, run its check, then move on. [solution/](solution/) has the completed project. [demo/](demo/) contains the ready-made webcam and browser helpers used by `checks.py`; the code-along edits remain in `starter/`. Allow about 75–90 minutes. The checks cover logic; the final camera and browser test needs a Mac with permissions.
 
 ## Setup before the session
 

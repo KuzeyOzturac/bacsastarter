@@ -55,7 +55,7 @@ class Step1(unittest.TestCase):
         self.assertEqual(head_direction(points), "right")
 
     def test_head_sequence_requires_order_and_steady_pose(self):
-        from head_demo import HeadSequence
+        from demo.head_demo import HeadSequence
 
         sequence = HeadSequence()
         sequence.update("left", 0)
@@ -85,7 +85,7 @@ class Step2(unittest.TestCase):
         self.assertTrue(eyes_are_closed(points, 1000, 1000))
 
     def test_three_blinks_require_closing_and_reopening(self):
-        from blink_demo import BlinkSequence
+        from demo.blink_demo import BlinkSequence
 
         sequence = BlinkSequence()
         sequence.update(True, 0)
@@ -119,7 +119,7 @@ class Step3(unittest.TestCase):
         self.assertGreater(vertical, 0.7)
 
     def test_gaze_sequence_uses_center_reference_and_order(self):
-        from gaze_demo import GazeSequence
+        from demo.gaze_demo import GazeSequence
 
         sequence = GazeSequence()
         sequence.update(None, None, False, False, 0)
@@ -141,7 +141,7 @@ class Step3(unittest.TestCase):
         self.assertTrue(sequence.complete)
 
     def test_gaze_sequence_rejects_head_turns(self):
-        from gaze_demo import GazeSequence
+        from demo.gaze_demo import GazeSequence
 
         sequence = GazeSequence()
         sequence.update(0.5, 0.5, True, True, 0)
@@ -180,7 +180,7 @@ class Step5(unittest.TestCase):
         self.assertTrue(tracker.update(9, away).trigger)
 
     def test_live_challenge_counts_two_separate_events(self):
-        from focus_demo import FocusChallenge
+        from demo.focus_demo import FocusChallenge
 
         challenge = FocusChallenge()
         def status(text, trigger=False):
@@ -198,7 +198,7 @@ class Step5(unittest.TestCase):
         self.assertEqual(challenge.trigger_count, 2)
 
     def test_live_challenge_flags_repeated_event(self):
-        from focus_demo import FocusChallenge
+        from demo.focus_demo import FocusChallenge
 
         challenge = FocusChallenge()
         challenge.update(SimpleNamespace(text="FOCUSED", trigger=False), True, 0)
@@ -238,7 +238,7 @@ class Step6(unittest.TestCase):
         import cv2
         import numpy as np
         from PIL import Image
-        from reels_demo import draw_result
+        from demo.reels_demo import draw_result
 
         screenshot = Image.fromarray(np.zeros((1000, 1000, 3), dtype=np.uint8))
         view = draw_result(cv2, np, screenshot, (500, 500), True, (1000, 1000))
@@ -274,26 +274,26 @@ if __name__ == "__main__":
         sys.exit(1)
     if args.webcam:
         if args.step == 1:
-            from head_demo import run
+            from demo.head_demo import run
 
             print("Follow Center, Left, Right, Center on screen. Press Q when finished.")
         elif args.step == 2:
-            from blink_demo import run
+            from demo.blink_demo import run
 
             print("Blink three times on screen. Press Q when finished.")
         elif args.step == 3:
-            from gaze_demo import run
+            from demo.gaze_demo import run
 
             print("Follow Center, Left, Right, Center with your eyes. Press R to recenter or Q to quit.")
         else:
-            from focus_demo import run
+            from demo.focus_demo import run
 
             print(f"Follow the Step {args.step} prompts. Press R to restart or Q to quit.")
         completed = run(args.step) if args.step in (4, 5) else run()
         print(f"Step {args.step} webcam task {'complete' if completed else 'incomplete'}.")
         sys.exit(0 if completed else 1)
     if args.live:
-        from reels_demo import run
+        from demo.reels_demo import run
 
         print("Opening Reels and searching for the mute icon. Press Q in the result window to quit.")
         completed = run()
