@@ -2,7 +2,7 @@
 
 Build the original feature path together: **webcam landmarks → head and eye measurements → gaze → calibration and smoothing → timed focus loss → open and unmute Reels → scroll on later focus losses**.
 
-[starter/](starter/) has seven marked gaps. Fill one gap, run its check, then move on. [solution/](solution/) has the completed project. [demo/](demo/) contains the ready-made webcam and browser helpers used by `checks.py`; the code-along edits remain in `starter/`. Allow about 75–90 minutes. The checks cover logic; the final camera and browser test needs a Mac with permissions.
+[starter/](starter/) has seven marked gaps. Fill one gap, run its check, then move on. [solution/](solution/) has the completed project. [demo/](demo/) contains the ready-made webcam and browser helpers used by `demo/checks.py`; the code-along edits remain in `starter/`. Allow about 75–90 minutes. The checks cover logic; the final camera and browser test needs a Mac with permissions.
 
 ## Setup before the session
 
@@ -12,7 +12,7 @@ Use **Python 3.11**, a webcam, and macOS camera, screen recording, and accessibi
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-python checks.py 1
+python demo/checks.py 1
 ```
 
 The last command should **fail** initially: Step 1 is unfinished. If `python3.11` is unavailable, install Python 3.11 or configure it in PyCharm. Run commands from the repository root with the virtual environment active.
@@ -29,9 +29,9 @@ if offset > HEAD_TURN_THRESHOLD:
 return "center"
 ```
 
-**Logic check:** `python checks.py 1` should pass. Why are there negative and positive thresholds?
+**Logic check:** `python demo/checks.py 1` should pass. Why are there negative and positive thresholds?
 
-**Webcam check:** Run `python checks.py 1 --webcam`. Follow **Center → Left → Right → Center** with your head. Hold each position briefly. Each finished direction turns green, and the window says **TASK COMPLETE!** after the fourth. The left-side, right-side, and nose landmarks are drawn on your face; the current offset and `HEAD_TURN_THRESHOLD` appear beside the video. Press **Q** to close the window. This check uses the `head_direction()` you just completed in `starter/vision.py`.
+**Webcam check:** Run `python demo/checks.py 1 --webcam`. Follow **Center → Left → Right → Center** with your head. Hold each position briefly. Each finished direction turns green, and the window says **TASK COMPLETE!** after the fourth. The left-side, right-side, and nose landmarks are drawn on your face; the current offset and `HEAD_TURN_THRESHOLD` appear beside the video. Press **Q** to close the window. This check uses the `head_direction()` you just completed in `starter/vision.py`.
 
 ## Step 2 — eye closure (8 minutes)
 
@@ -41,9 +41,9 @@ In `starter/vision.py`, find `STEP 2`. The code divides each eye's height by its
 return average_ratio < EYE_CLOSED_THRESHOLD
 ```
 
-**Logic check:** `python checks.py 2` should pass for both open and closed sample eyes.
+**Logic check:** `python demo/checks.py 2` should pass for both open and closed sample eyes.
 
-**Webcam check:** Run `python checks.py 2 --webcam`. Blink three times. Each blink turns green only after your eyes close and reopen; then the window says **TASK COMPLETE!** The top, bottom, inner, and outer landmarks for both eyes are marked on your face. The left and right eye aspect ratios, their average, and `EYE_CLOSED_THRESHOLD` appear beside the video. Press **Q** to close the window. This check uses the `eyes_are_closed()` you just completed in `starter/vision.py`.
+**Webcam check:** Run `python demo/checks.py 2 --webcam`. Blink three times. Each blink turns green only after your eyes close and reopen; then the window says **TASK COMPLETE!** The top, bottom, inner, and outer landmarks for both eyes are marked on your face. The left and right eye aspect ratios, their average, and `EYE_CLOSED_THRESHOLD` appear beside the video. Press **Q** to close the window. This check uses the `eyes_are_closed()` you just completed in `starter/vision.py`.
 
 ## Step 3 — iris gaze (10 minutes)
 
@@ -54,9 +54,9 @@ horizontal = (left_horizontal + right_horizontal) / 2
 vertical = (left_vertical + right_vertical) / 2
 ```
 
-**Logic check:** `python checks.py 3` moves the sample irises and checks that the result changes.
+**Logic check:** `python demo/checks.py 3` moves the sample irises and checks that the result changes.
 
-**Webcam check:** Run `python checks.py 3 --webcam`. Keep your head still and follow **Center → Left → Right → Center** with your eyes. Look at the screen during the first Center step so the check can capture a short reference. Hold each later gaze briefly. Completed directions turn green; the final one displays **TASK COMPLETE!** Eye landmarks and iris centers appear on your face. The panel still shows horizontal and vertical gaze ratios, but only horizontal movement determines the tasks. Press **R** to start over with a new center reference or **Q** to quit. This short reference belongs only to the check; Step 4 builds the app's full calibration and smoothing.
+**Webcam check:** Run `python demo/checks.py 3 --webcam`. Keep your head still and follow **Center → Left → Right → Center** with your eyes. Look at the screen during the first Center step so the check can capture a short reference. Hold each later gaze briefly. Completed directions turn green; the final one displays **TASK COMPLETE!** Eye landmarks and iris centers appear on your face. The panel still shows horizontal and vertical gaze ratios, but only horizontal movement determines the tasks. Press **R** to start over with a new center reference or **Q** to quit. This short reference belongs only to the check; Step 4 builds the app's full calibration and smoothing.
 
 ## Step 4 — smoothing and calibration (12 minutes)
 
@@ -76,9 +76,9 @@ self.center = (
 )
 ```
 
-**Logic check:** `python checks.py 4` should pass. Why learn *your* center instead of assuming everyone's is `0.5`?
+**Logic check:** `python demo/checks.py 4` should pass. Why learn *your* center instead of assuming everyone's is `0.5`?
 
-**Webcam check:** Run `python checks.py 4 --webcam`. Look at the screen for the three-second calibration. The window shows the countdown, raw and smoothed gaze values, the learned center, and a graph of recent raw and smoothed horizontal readings. After calibration and five more visible-face frames, both tasks turn green and **TASK COMPLETE!** appears. Move your eyes sideways to compare the two graph lines. Press **R** to restart or **Q** to quit.
+**Webcam check:** Run `python demo/checks.py 4 --webcam`. Look at the screen for the three-second calibration. The window shows the countdown, raw and smoothed gaze values, the learned center, and a graph of recent raw and smoothed horizontal readings. After calibration and five more visible-face frames, both tasks turn green and **TASK COMPLETE!** appears. Move your eyes sideways to compare the two graph lines. Press **R** to restart or **Q** to quit.
 
 ## Step 5 — timed, one-shot focus loss (10 minutes)
 
@@ -89,9 +89,9 @@ trigger = not self.triggered
 self.triggered = True
 ```
 
-The existing focused branch resets `self.triggered`. **Logic check:** `python checks.py 5` should pass. What if the flag were never reset?
+The existing focused branch resets `self.triggered`. **Logic check:** `python demo/checks.py 5` should pass. What if the flag were never reset?
 
-**Webcam check:** Run `python checks.py 5 --webcam`. Calibrate while looking at the screen. Turn your head away for more than one second to cause one trigger. Keep looking away briefly and verify the counter stays at **1**. Look back until the app reports `FOCUSED`, then turn away again for a second trigger. Each task turns green, and the window displays **TASK COMPLETE!** at the end. This check never opens Reels. Press **R** to restart or **Q** to quit.
+**Webcam check:** Run `python demo/checks.py 5 --webcam`. Calibrate while looking at the screen. Turn your head away for more than one second to cause one trigger. Keep looking away briefly and verify the counter stays at **1**. Look back until the app reports `FOCUSED`, then turn away again for a second trigger. Each task turns green, and the window displays **TASK COMPLETE!** at the end. This check never opens Reels. Press **R** to restart or **Q** to quit.
 
 ## Step 6 — find and click the mute icon (15 minutes)
 
@@ -108,9 +108,9 @@ print(f"Reels unmuted (match score {best_score:.3f}).")
 return True
 ```
 
-The scale divisions turn screenshot pixels into screen coordinates. **Logic check:** `python checks.py 6` uses a fake screenshot and verifies the click location. It does not click your screen.
+The scale divisions turn screenshot pixels into screen coordinates. **Logic check:** `python demo/checks.py 6` uses a fake screenshot and verifies the click location. It does not click your screen.
 
-**Live check:** Run `python checks.py 6 --live`. It opens Instagram Reels in your browser, uses your real screen to find the mute icon, and actually clicks the match. A result window then shows the screenshot it searched, the search region, and the click point. **TASK COMPLETE!** means a candidate icon was clicked; confirm that the Reel actually unmuted. Press **Q** in the result window to quit. This check does not use your webcam.
+**Live check:** Run `python demo/checks.py 6 --live`. It opens Instagram Reels in your browser, uses your real screen to find the mute icon, and actually clicks the match. A result window then shows the screenshot it searched, the search region, and the click point. **TASK COMPLETE!** means a candidate icon was clicked; confirm that the Reel actually unmuted. Press **Q** in the result window to quit. This check does not use your webcam.
 
 ## Step 7 — connect browser actions (10 minutes)
 
@@ -129,4 +129,4 @@ else:
     reels_started = open_reels()
 ```
 
-**Check:** `python checks.py 7` verifies scrolling. Then run `python starter/main.py`. Look at the screen for the three-second calibration; the window should say `FOCUSED`. Turn your head away for over one second: Reels should open and the mute icon should be clicked. Look back to reset focus, then turn away again: it should scroll. Press **Q** in the Focus Detector window to quit.
+**Check:** `python demo/checks.py 7` verifies scrolling. Then run `python starter/main.py`. Look at the screen for the three-second calibration; the window should say `FOCUSED`. Turn your head away for over one second: Reels should open and the mute icon should be clicked. Look back to reset focus, then turn away again: it should scroll. Press **Q** in the Focus Detector window to quit.

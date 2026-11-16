@@ -1,4 +1,4 @@
-"""Run one workshop checkpoint: python checks.py 1 (through 7)."""
+"""Run one workshop checkpoint: python demo/checks.py 1 (through 7)."""
 
 import argparse
 import importlib
@@ -9,8 +9,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT / os.environ.get("BACSA_CHECK_SOURCE", "starter")))
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT / os.environ.get("BACSA_CHECK_SOURCE", "starter")))
 
 from focus import FocusTracker
 from vision import (
