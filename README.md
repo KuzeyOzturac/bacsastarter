@@ -130,11 +130,3 @@ else:
 ```
 
 **Check:** `python checks.py 7` verifies scrolling. Then run `python starter/main.py`. Look at the screen for the three-second calibration; the window should say `FOCUSED`. Turn your head away for over one second: Reels should open and the mute icon should be clicked. Look back to reset focus, then turn away again: it should scroll. Press **Q** in the Focus Detector window to quit.
-
-## Presenter notes
-
-- Run all seven checks and the final camera/browser flow on your presentation Mac before the session.
-- Camera permissions, Instagram layout, and display scaling can affect the live demo. Keep a short recording as a backup.
-- Face and eye readings estimate visible behavior; they cannot tell what someone is thinking.
-- The first action counts as started only if the browser opens **and** the mute icon is found. A later focus loss retries if icon matching fails.
-- Run a check against the completed code with `BACSA_CHECK_SOURCE=solution python checks.py 1` (change the number).
